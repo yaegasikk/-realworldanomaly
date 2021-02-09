@@ -4,7 +4,6 @@ import torch
 from torch.utils import data
 from tqdm import tqdm
 
-dataset_dir='./anomaly_features_1fps'
 
 def read_trainannotation(annotation_list='./Train_Annotation.txt'):
 
