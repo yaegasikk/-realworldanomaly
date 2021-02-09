@@ -37,19 +37,19 @@ class Threelayerfc(nn.Module):
 
 
 def custom_objective(y_pred, y_true):
-    # y_pred (batch_size, 32, 1)
+    # y_pred (batch_size, 360, 1)
     # y_true (batch_size)
     lambdas = 8e-5
 
     normal_vids_indices = (y_true == 0).nonzero().flatten()
     anomal_vids_indices = (y_true == 1).nonzero().flatten()
 
-    normal_segments_scores = y_pred[normal_vids_indices]  # (batch/2, 32, 1)
-    anomal_segments_scores = y_pred[anomal_vids_indices]  # (batch/2, 32, 1)
+    normal_segments_scores = y_pred[normal_vids_indices]  # (batch/2, 360, 1)
+    anomal_segments_scores = y_pred[anomal_vids_indices]  # (batch/2, 360, 1)
 
     # just for reducing the last dimension
-    normal_segments_scores = torch.sum(normal_segments_scores, dim=(-1,))  # (batch/2, 32)
-    anomal_segments_scores = torch.sum(anomal_segments_scores, dim=(-1,))  # (batch/2, 32)
+    normal_segments_scores = torch.sum(normal_segments_scores, dim=(-1,))  # (batch/2, 360)
+    anomal_segments_scores = torch.sum(anomal_segments_scores, dim=(-1,))  # (batch/2, 360)
 
     # get the max score for each video
     normal_segments_scores_maxes = normal_segments_scores.max(dim=-1)[0]

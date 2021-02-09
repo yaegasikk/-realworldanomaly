@@ -75,3 +75,52 @@ class FeatureLoader(data.Dataset):
             out_data = self.anomaly_dataset[idx]
         
         return out_data,out_label
+
+class TestFeatureLoader(data.Dataset):
+    def __init__(self,annotation_path='./Test_Annotation.txt',dataset_dir='./anomaly_features'):
+        super(TestFeatureLoader,self).__init__()
+        self.annotation_path = annotation_path
+        self.dataset_dir = dataset_dir
+        self.test_annotation =self._read_testannotation()
+        self.feature_dataset, self.label_dataset = self._get_feature()
+
+    def __len__(self):
+
+        return self.feature_dataset.shape[0]
+
+    def _read_testannotation(self):
+        f=open(self.annotation_path,'r')
+        read_data = f.readlines()
+        test_annotation = []
+        for read_data_i in read_data:
+            read_data_split = read_data_i.split()
+            feature_path = os.path.splitext(read_data_split[0])[0]+'.npy'
+            read_data_split[0] = feature_path
+            test_annotation.append(read_data_split)
+
+        return test_annotation
+    
+    def _get_feature(self):
+        label_dataset=torch.tensor([])
+        feature_dataset=torch.tensor([])
+        for annotation_i in tqdm(self.test_annotation):
+            path = '/'.join([self.dataset_dir,annotation_i[0]])
+            feature = torch.from_numpy(np.load(path))
+            feature_dataset=torch.cat([feature_dataset,feature])
+            label = torch.zeros(feature.shape[0])
+
+            if int(annotation_i[3]) != -1:
+                label[int(annotation_i[3]):int(annotation_i[4])] = 1
+
+            if int(annotation_i[5]) != -1:
+                label[int(annotation_i[5]):int(annotation_i[6])] = 1
+
+            label_dataset = torch.cat([label_dataset,label])
+
+        return feature_dataset,label_dataset
+
+    def __getitem__(self,idx):
+
+        return self.feature_dataset[idx], self.label_dataset[idx]
+
+

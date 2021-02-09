@@ -7,7 +7,7 @@ import pandas as pd
 
 batch_size=60
 bag_size = batch_size//2
-epochs = 200
+epochs = 20000
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 #device = "cpu"
@@ -76,4 +76,6 @@ for epochs_i in range(epochs):
 
     total_loss_list.append(total_loss/(len(normal_trainloader)+len(anomaly_trainloader)))
     print("epoch {} , loss {}".format(epochs_i,total_loss_list[-1]))
+
+torch.save(model.to('cpu').state_dict(),'./save_weight/model_{}.pth'.format(epochs))
     
