@@ -34,16 +34,21 @@ anomaly_dataset = pd.read_pickle('anomaly_dataset.pkl')
 normal_trainloader = torch.utils.data.DataLoader(normal_dataset,batch_size=bag_size,num_workers=4,shuffle=True,drop_last=False)
 anomaly_trainloader = torch.utils.data.DataLoader(anomaly_dataset,batch_size=bag_size,num_workers=4,shuffle=True,drop_last=True)
 
+load_epoch = 12000
+load_weight = './save_weight/model_{}.pth'.format(load_epoch)
 model = Threelayerfc()
+model.load_state_dict(torch.load(load_weight))
 model = model.to(device)
+print('load weight')
 
 criterion = RegularizedLoss(model, custom_objective)
 optimizer = torch.optim.Adadelta(model.parameters(),lr=0.01,eps=1e-8)
 
 #print(iter(normal_trainloader).__next__()[0].shape)
 
+add_epochs = epochs+load_epoch
 print('Start Train')
-for epochs_i in range(epochs):
+for epochs_i in range(add_epochs):
     total_loss = 0
     total_loss_list=[]
     model.train()
@@ -75,9 +80,9 @@ for epochs_i in range(epochs):
         #print(output.shape)
 
     total_loss_list.append(total_loss/(len(normal_trainloader)+len(anomaly_trainloader)))
-    print("epoch {} , loss {}".format(epochs_i,total_loss_list[-1]))
-    if epochs_i%2000 == 0:
-        torch.save(model.to('cpu').state_dict(),'./save_weight/model_{}.pth'.format(epochs_i))
+    print("epoch {} , loss {}".format(epochs_i+load_epoch,total_loss_list[-1]))
+    if (epochs_i+load_epoch)%2000 == 0:
+        torch.save(model.to('cpu').state_dict(),'./save_weight/model_{}.pth'.format(epochs_i+load_epoch))
         model = model.to(device)
 
 torch.save(model.to('cpu').state_dict(),'./save_weight/model_{}.pth'.format(epochs))
